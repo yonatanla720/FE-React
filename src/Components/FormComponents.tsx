@@ -13,9 +13,10 @@ import {
 } from "@mui/material";
 import { useState, useRef, useEffect } from "react";
 
-const url = "https://countriesnow.space/api/v0.1/countries/cities";
+const CITIES_API = "https://countriesnow.space/api/v0.1/countries/cities";
+const BACKED_API_URL = "http://localhost:8080/api/form-response";
 
-const data = {
+const CITIES_API_DATA = {
   country: "nigeria",
 };
 
@@ -38,12 +39,12 @@ function FormComponent() {
   const [cities, setCities] = useState<string[]>([]);
 
   useEffect(() => {
-    fetch(url, {
+    fetch(CITIES_API, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(data),
+      body: JSON.stringify(CITIES_API_DATA),
     })
       .then((response) => response.json())
       .then((data) => {
@@ -60,15 +61,23 @@ function FormComponent() {
 
   const handleChange = (e: any) => {
     const { name, type, checked, value } = e.target;
+    console.log(value);
     setFormData((prevData) => ({
       ...prevData,
       [name]: type === "checkbox" ? checked : value,
     }));
   };
 
+  const handleSelect = (e: any) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      city: e.target.textContent,
+    }));
+  };
+
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    fetch("http://localhost:8080/api/form-response", {
+    fetch(BACKED_API_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -128,9 +137,14 @@ function FormComponent() {
           <Autocomplete
             options={cities}
             value={formData.city}
-            onChange={handleChange}
+            onChange={handleSelect}
             renderInput={(params) => (
-              <TextField {...params} label="City" style={{ width: "40%" }} />
+              <TextField
+                {...params}
+                name="city"
+                label="City"
+                style={{ width: "40%" }}
+              />
             )}
           />
           <TextField
